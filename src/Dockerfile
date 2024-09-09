@@ -1,9 +1,16 @@
-FROM python:3.8-slim
+# Use the official Jenkins image
+FROM jenkins/jenkins:lts
 
-WORKDIR /app
+# Switch to root user to install packages
+USER root
 
-COPY . .
+# Install socat
+RUN apt-get update && \
+    apt-get install -y socat && \
+    apt-get clean
 
-RUN pip install -r requirements.txt
+# Switch back to Jenkins user
+USER jenkins
 
-CMD ["python", "app.py"]
+# Expose Jenkins port
+EXPOSE 8080
