@@ -74,7 +74,7 @@
         src: ~/.ssh/authorized_keys # or some other public key
         dest: /home/ubuntu/.ssh/authorized_keys
 
-    - name: Clone or update app repo
+    - name: Clone or update repo
       git:
         repo: 'https://github.com/Yoram-Izilov-Nitzanim/CICD-Workshop.git'
         dest: /home/ubuntu/CICD-Workshop
@@ -84,6 +84,7 @@
     - name: Build and push Docker image
       docker_image:
         name: my-app
+        tag: latest
         source: build
         build:
           path: /home/ubuntu/CICD-Workshop/src/
