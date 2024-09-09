@@ -1,0 +1,10 @@
+---
+- name: Destroy Infrastructure
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Terminate EC2 instances
+      ec2:
+        region: us-east-1
+        instance_ids: "{{ lookup('ec2_tag', 'Name=CI-CD-Yoram') }}"
+        state: absent

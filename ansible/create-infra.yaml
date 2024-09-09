@@ -1,0 +1,96 @@
+---
+- name: Create Infrastructure
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Create EC2 instance
+      amazon.aws.ec2_instance:
+        key_name: yoram-ssh
+        instance_type: t2.micro
+        image_id: ami-0e86e20dae9224db8 
+        wait: yes
+        region: us-east-1
+        count: 1
+        network:
+          assign_public_ip: yes
+        vpc_subnet_id : subnet-0452b44b8cc2a5a34
+        security_groups:
+          - sg-02a922a216b8f2690
+        tags:
+          Name: CI-CD-Yoram
+      register: ec2
+
+    - name: Add new instance to host group
+      add_host:
+        hostname: "{{ item.network_interfaces[0].association.public_ip }}"
+        groupname: app
+      with_items: "{{ ec2.instances }}"
+
+- name: Setup web server
+  hosts: app
+  user: ubuntu
+  become: True
+  gather_facts: True
+  tasks:
+    - name: Update APT package index
+      apt:
+        update_cache: yes
+
+    - name: Install required packages
+      apt:
+        name:
+          - software-properties-common
+          - git
+          - python3-pip
+          - apt-transport-https
+        state: present
+        
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+    - name: Add Docker repository
+      apt_repository:
+        repo: 'deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable'
+        state: present
+
+    - name: Install Docker and Docker Compose
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-compose
+        state: present
+
+    - name: Start Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Copy SSH key
+      copy:
+        src: ~/.ssh/authorized_keys
+        dest: /home/ubuntu/.ssh/authorized_keys
+
+    - name: Clone app repo
+      git:
+        repo: 'https://github.com/your-username/ci-cd-pipeline-demo.git'
+        dest: /home/ubuntu/app
+
+    - name: Build and push Docker image
+      docker_image:
+        name: my-app
+        source: build
+        build:
+          path: /home/ubuntu/app
+        state: present
+
+    - name: Start Docker app
+      docker_container:
+        name: my-app
+        image: my-app
+        state: started
+        ports:
+          - "80:80"
