@@ -1,0 +1,28 @@
+pipeline {
+  agent any
+  triggers {
+    // Poll SCM every 5 minutes; remove if using webhooks
+    pollSCM('H/5 * * * *')
+  }
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+    stage('Deploy') {
+      steps {
+        // ansible path - name of the job ansible-job
+        sh 'ansible-playbook /var/lib/jenkins/workspace/ansible-job/ansible/create-infra.yaml'
+      }
+    }
+  }
+  post {
+    success {
+      echo 'Deployment succeeded!'
+    }
+    failure {
+      echo 'Deployment failed!'
+    }
+  }
+}
