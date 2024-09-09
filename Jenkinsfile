@@ -28,7 +28,7 @@ pipeline {
       }
       steps {
         // ansible path - ansible-job   
-        withCredentials([aws(credentialsId: 'my-aws-credentials-id', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+        withCredentials([aws(credentialsId: 'yoram', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
             sh 'ansible-playbook /var/lib/jenkins/workspace/ansible-job/ansible/create-infra.yaml'
         }
       }
