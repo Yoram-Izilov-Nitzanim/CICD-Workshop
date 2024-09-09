@@ -3,8 +3,16 @@
   hosts: localhost
   gather_facts: no
   tasks:
-    - name: Terminate EC2 instances
-      ec2:
+    - name: Retrieve EC2 instances by tag
+      amazon.aws.ec2_instance_info:
         region: us-east-1
-        instance_ids: "{{ lookup('ec2_tag', 'Name=CI-CD-Yoram') }}"
+        filters:
+          "tag:Name": "CI-CD-Yoram"
+      register: ec2_facts
+
+    - name: Terminate EC2 instances
+      amazon.aws.ec2_instance:
+        region: us-east-1
+        instance_ids: "{{ ec2_facts.instances | map(attribute='instance_id') | list }}"
         state: absent
+      when: ec2_facts.instances | length > 0
