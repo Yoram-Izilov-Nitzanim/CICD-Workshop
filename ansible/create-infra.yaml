@@ -13,12 +13,16 @@
         count: 1
         network:
           assign_public_ip: yes
-        vpc_subnet_id : subnet-0452b44b8cc2a5a34
+        vpc_subnet_id: subnet-0452b44b8cc2a5a34
         security_groups:
           - sg-02a922a216b8f2690
         tags:
           Name: CI-CD-Yoram
       register: ec2
+
+    - name: Pause for 30 seconds to ensure the instance is fully up
+      pause:
+        seconds: 30
 
     - name: Add new instance to host group
       add_host:
@@ -49,6 +53,7 @@
       apt_key:
         url: https://download.docker.com/linux/ubuntu/gpg
         state: present
+
     - name: Add Docker repository
       apt_repository:
         repo: 'deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable'
