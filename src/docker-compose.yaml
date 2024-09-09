@@ -1,9 +1,26 @@
 version: '3.8'
 
 services:
-  app:
+  jenkins:
     build: .
     ports:
-      - "5000:5000"
-    environment:
-      - FLASK_ENV=development
+      - "8080:8080" # Jenkins web interface
+      - "50000:50000" # Jenkins agent port
+    volumes:
+      - jenkins_data:/var/jenkins_home # Persistent storage for Jenkins data
+    networks:
+      - jenkins_network
+
+  socat:
+    image: alpine/socat:latest
+    command: >
+      TCP-LISTEN:8081,fork,reuseaddr TCP:jenkins:8080
+    networks:
+      - jenkins_network
+
+networks:
+  jenkins_network:
+    driver: bridge
+
+volumes:
+  jenkins_data:
