@@ -30,7 +30,7 @@ pipeline {
         // ansible path - ansible-job   
         withCredentials([aws(credentialsId: 'yoram', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
             sh '''
-                sudo -u ubuntu ansible-playbook /var/lib/jenkins/workspace/ansible-job/ansible/create-infra.yaml
+                sudo -u ubuntu ansible-playbook /var/lib/jenkins/workspace/ansible-job/ansible/create-infra.yaml  --private-key=/home/ubuntu/.ssh/yoram-ssh.pem
             '''
         }
       }
