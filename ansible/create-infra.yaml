@@ -95,4 +95,4 @@
         image: my-app
         state: started
         ports:
-          - "80:80"
+          - "80:8080"
